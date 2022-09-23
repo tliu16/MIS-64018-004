@@ -1,0 +1,158 @@
+---
+title: "MIS64018-004 Assignment 2 Module4 "
+author: "wliu16"
+date: "2022-09-22"
+output: pdf_document
+---
+
+```{r}
+#Set working directory, install and load the package lpSolveAPI
+setwd("~/Desktop/R/64018/Assignment module 4")
+library(lpSolveAPI)
+```
+
+Next, we will list the objective function and constraints. 
+$$\text{The objective function is to } Max \hspace{.2cm} 
+Z = 420(L_1+L_2+L_3)+360(M_1+M_2+M_3)+300(S_1+S_2+S_3)$$
+$$\text{which can also be written as }Z = 420 L_1 + 420 L_2 + 420 L_3 + 360 M_1 + 360 M_2 + 360 M_3 + 300 S_1 + 300 S_2 + 300 S_3$$
+
+Subject to the following capacity constraints
+$$L_1 + M_1 + S_1 \le 750$$
+$$L_2+M_2+S_2 \le 900$$
+$$L_3 + M_3 +S_3 \le 450$$
+Storage constraints
+$$20 L_1 + 15 M_1 + 12 S_1 \le 13000$$
+$$20 L_2 + 15 M_2 + 12 S_2 \le 12000$$
+$$20 L_3 + 15 M_3 +12 S_3 \le 5000$$
+Sale constraints
+$$L_1 + L_2 + L_3 \le 900$$
+$$M_1 + M_2+ M_3 \le 1200$$
+$$S_1 + S_2 + S_3 \le 750$$
+Same percentage production among three plants
+$$L_1 + M_1 + S_1)/(L_2 + M_2 + S_2)/(L_3+M_3+S_3) = 750:900:450$$
+Which can be broken down to
+$$(L_1 + M_1 + S_1)/(L_2 + M_2 + S_2) = 750:900$$
+$$(L_2 + M_2 + S_2)/(L_3+M_3+S_3) = 900:450$$
+Which are equivalent to the following
+
+$$900 L_1+ 900 M_1+ 900 S_1 - 750 L_2- 750 M_2 -750 S_2 = 0$$
+$$450 L_2 + 450 M_2 + 450 S_2 - 900 L_3 - 900 M_3 - 900 S_3 = 0$$
+Second equation can be further simplified to:
+$$L_2 + M_2 + S_2 - 2 L_3 - 2 M_3 - 2 S_3 = 0$$
+Non-negativity constraints
+$$L_1, L_2, L_3, M_1, M_2,M_3, S_1, S_2, S_3 \ge 0$$
+All the 11 constraints as follows:
+$$L_1 + 0 L_2 + 0 L_3 +M_1 +0 M_2 +0 M_3 +S_1 + 0 S_2 + 0 S_3 \le 750$$
+$$0L_1 + L_2 + 0 L_3 +0 M_1 +M_2 +0 M_3 +0 S_1 + S_2 + 0 S_3\le 900$$
+$$0L_1 + 0 L_2 + L_3 +0 M_1 +0 M_2 +M_3 +0 S_1 +0 S_2 +S_3\le 450$$
+$$20 L_1 + 0 L_2 +0 L_3 +15 M_1 + 0 M_2 +0 M_3 +12 S_1 +0 S_2 +0 S_3 \le 13000$$
+$$0 L_1 + 20 L_2 +0 L_3 +0 M_1 + 15 M_2 +0 M_3 +0 S_1 +12 S_2 +0 S_3  \le 12000$$
+$$0 L_1 + 0 L_2 +20 L_3 +0 M_1 + 0 M_2 +15 M_3 +0 S_1 +0 S_2 +12 S_3  \le 5000$$
+$$L_1 +  L_2 +  L_3 +0 M_1 +0 M_2 +0 M_3 +0 S_1 + 0 S_2 + 0 S_3 \le 900$$
+$$0 L_1 +0  L_2 +0  L_3 + M_1 + M_2 + M_3 +0 S_1 + 0 S_2 + 0 S_3 \le 1200$$
+$$0 L_1 +0  L_2 +0  L_3 +0 M_1 +0 M_2 +0 M_3 + S_1 + S_2 + S_3 \le 750$$
+$$900 L_1+ 900 M_1+ 900 S_1 - 750 L_2- 750 M_2 -750 S_2 = 0$$
+$$ L_2 + M_2 + S_2 - 2 L_3 - 2 M_3 - 2 S_3 = 0$$
+Considering the first 9 constraints,
+```{r}
+library("lpSolve")
+f.obj <- c(420,420,420,360,360,360,300,300,300)
+f.con <- matrix(c(1,0,0,1,0,0,1,0,0,
+                   0,1,0,0,1,0,0,1,0,
+                   0,0,1,0,0,1,0,0,1,
+                   20,0,0,15,0,0,12,0,0,
+                   0,20,0,0,15,0,0,12,0,
+                   0,0,20,0,0,15,0,0,12,
+                   1,1,1,0,0,0,0,0,0,
+                   0,0,0,1,1,1,0,0,0,
+                   0,0,0,0,0,0,1,1,1), nrow = 9, byrow = TRUE)
+f.dir <- c("<=",
+            "<=",
+           "<=",
+            "<=",
+           "<=",
+           "<=",
+            "<=",
+            "<=",
+            "<=")
+f.rhs <- c(750,
+            900,
+            450,
+            13000,
+            12000,
+            5000,
+            900,
+            1200,
+            750)
+
+# Final value output
+lp("max", f.obj, f.con,f.dir,f.rhs)
+ 
+# Variables final values
+lp("max", f.obj, f.con,f.dir,f.rhs)$solution
+
+```
+
+Considering all 11 constraints,
+```{r lpcodeœ, results="hide"}
+lprec <- make.lp(0,9)  #start with 0 constraint and 9 variables
+set.objfn(lprec, c(420, 420, 420, 360, 360, 360, 300, 300, 300))#objective func
+lp.control(lprec, sense = 'max')  # this is a maximization problem
+
+#Add the constraints
+add.constraint(lprec, c(1,0,0,1,0,0,1,0,0), "<=", 750) 
+add.constraint(lprec, c(0,1,0,0,1,0,0,1,0), "<=", 900)
+add.constraint(lprec, c(0,0,1,0,0,1,0,0,1), "<=", 450)
+add.constraint(lprec, c(20,0,0,15,0,0,12,0,0),"<=",13000)
+add.constraint(lprec, c(0,20,0,0,15,0,0,12,0), "<=", 12000)
+add.constraint(lprec, c(0,0,20,0,0,15,0,0,12),"<=", 5000)
+add.constraint(lprec,c(1,1,1,0,0,0,0,0,0), "<=", 900) 
+add.constraint(lprec, c(0,0,0,1,1,1,0,0,0), "<=",1200)
+add.constraint(lprec, c(0,0,0,0,0,0,1,1,1), "<=", 750)
+add.constraint(lprec, c(900,-750,0, 900,-750,0,900,-750,0),"=",0)
+add.constraint(lprec, c(0,450,-900,0,450,-900,0,450,-900),"=",0)
+
+#set variable names and name the constraints
+RowNames <- c("Capacity1", "Capacity2", "Capacity3", "Storage1","Storage2",
+              "Storage3","Sale1","Sale2","Sale3","Perc1","Perc2")
+ColNames <- c("L1", "L2", "L3","M1","M2","M3", "S1","S2","S3")
+dimnames(lprec) <- list(RowNames, ColNames)
+
+# The model can also be saved to a file
+write.lp(lprec, filename = "wliu16.lp", type = "lp")
+
+x <- read.lp("wliu16.lp") # create an lp object x
+x 
+```
+
+```{r}
+solve(lprec)
+```
+
+The objective function is 696,000
+
+```{r}
+get.objective(lprec)
+get.variables(lprec)
+```
+The 9 variables are 516.6667, 0, 0, 177.7778, 666.6667, 0,0, 166.6667, 416.6667
+
+In conclusion if considering first 9 constraints:
+The optimal output is 708000 and 9 variables are 
+350.0000   0.0000   0.0000 400.0000 400.0000 133.3333   0.0000 500.0000 250.0000
+Plant1 produces 350 large and 400 medium products
+Plant2 produces 400 medium and 500 small products
+Plant3 produces 133.3333 medium and 250 small products
+
+If considering all 11 constraints,the optimal max profit is 696,000
+Plant1 produces 516.6667 large and 177.7778 medium products, 
+Plant2 produces 666.6667 medium and 166.6667 small products
+Plant3 produces 416.6667 small products.
+If the number of products are integers, we will take a neighboring set of 
+the optimal that can satisfy the percentage constraint approx (not 100%). 
+Plant1 can produce 516 large and 177 medium products. 
+Plant 2 should produce 666 medium and 166 small products while 
+Plant 3 should produce 416 small products to reach a max profit of 694,800
+
+$$Z = 420* 516 + 360*(177+ 666) + 300*(166+416) = 694,800$$
+
