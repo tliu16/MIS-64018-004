@@ -1,0 +1,136 @@
+---
+title: "Assignment 4 module 8"
+author: "wliu16"
+date: "2022-10-31"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(Benchmarking)
+```
+
+```{r}
+#format the problem
+tab <- matrix(c("Facility 1","Facility 2","Facility 3","Facility 4","Facility 5",
+                "Facility 6",
+              150,400,320,520,350,320,
+              0.2,0.7,1.2,2.0,1.2,0.7,
+              14000,14000,42000,28000,19000,14000,
+              3500,21000,10500,42000,25000,15000), ncol=5, byrow=F)
+colnames(tab) <- c('DMU', 'Staff Hour per Day','Supplies per Day','Reimbursed patient-days',
+                   'Privately Paid Patient-Days')
+tab <- as.table(tab)
+tab
+```
+
+***1. Formulate and perform DEA of FDH, CRS, VRS, IRS, DRS, and FRH.***
+***2. Determine the Peers and Lambdas under each of the above assumptions***
+```{r}
+#Input format
+x<-matrix(c(150,400,320,520,350,320,
+              0.2,0.7,1.2,2.0,1.2,0.7), 
+          ncol = 2)
+y<-matrix(c(14000,14000,42000,28000,19000,14000,
+              3500,21000,10500,42000,25000,15000),
+          ncol=2)
+colnames(y)<-c('Reimbursed patient-days', 'Privately Paid Patient-Days')
+colnames(x)<-c('Staff Hour per Day','Supplies per Day')
+
+#Scale: CRS, IRS, DRS, VRS
+dea(x,y,RTS="crs")
+e<-dea(x,y,RTS = "crs")
+e
+peers(e)
+lambda(e)
+```
+CRS Observation:
+Facility 1, 2, 3, 4 are efficient. Facility 5 is 97.75% efficient and facility 6
+is 86.75 efficient. Both facility 5 and 6 use peer reference of facility 1, 2 and
+4. The weights of facility 1, 2, 4 to facility 5 are 0.2, 0.08 and 0.54;
+The weights of the same facilities to facility 6 are 0.34, 0.39, and 0.13
+
+```{r}
+dea(x,y,RTS="irs")
+e<-dea(x,y,RTS = "irs")
+e
+peers(e)
+lambda(e)
+```
+IRS Observation:
+Facility 1, 2, 3, 4, 5 are efficient. Facility  6 is 89.63 efficient and uses 
+facility 1, 2 and 5 as peer references. The weights of facility of 1, 2, and 5
+to facility 6 are 0.4, 0.34 and 0.26
+```{r}
+dea(x,y,RTS="drs")
+e<-dea(x,y,RTS = "drs")
+e
+peers(e)
+lambda(e)
+```
+DRS Observation:
+Facility 1, 2, 3, 4 are efficient. Facility 5 is 97.75 efficient and Facility 6 
+is 86.75 efficient. Both use facility 1, 2 and 4 as peer references.
+The weights of facility 1, 2, 4 to facility 5 are 0.2, 0.08 and 0.54;
+The weights of the same facilities to facility 6 are 0.34, 0.39, and 0.13
+
+```{r}
+dea(x,y,RTS="vrs")
+e<-dea(x,y,RTS = "vrs")
+e
+peers(e)
+lambda(e)
+```
+VRS Observation:
+Facility 1, 2, 3, 4, 5 are efficient. Facility  6 is 89.63 efficient and uses 
+facility 1, 2 and 5 as peer references. The weights of facility of 1, 2, and 5
+to facility 6 are 0.4, 0.34 and 0.26
+```{r}
+#Free disposability FDH and free replicability FRH
+dea(x,y,RTS="fdh")
+e<-dea(x,y,RTS = "fdh")
+e
+peers(e)
+lambda(e)
+
+dea(x,y,RTS="fdh+")
+e<-dea(x,y,RTS = "fdh+")
+e
+peers(e)
+lambda(e)
+```
+FDH and FRH Observation:
+Both share the same results. All facilities are efficient in both methods.
+
+***3. Summary of results in tabular format***
+```{r}
+summary_tab <- matrix(c("Facility 1","Facility 2","Facility 3","Facility 4","Facility 5",
+                "Facility 6", "Peer set",
+              1,1,1,1,0.9775, 0.8675, "1,2,4",
+              1,1,1,1,0.9775, 0.8675, "1,2,4",
+              1,1,1,1,1,0.8963, "1,2,5",
+              1,1,1,1,1,0.8963,"1,2,5",
+              1,1,1,1,1,1,"NA",
+              1,1,1,1,1,1, "NA"), ncol=7, byrow=F)
+colnames(summary_tab) <- c('DMU', 'CRS','DRS','IRS','VRS', 'FDH','FRH')
+summary_tab <- as.table(summary_tab)
+summary_tab
+```
+<br/ >
+<br/ >
+Comments:
+1 means efficient. Since Facility 5 and 6 always have the same peer set, we 
+use one peer set to refer to each method.
+
+***4. Compare and contrast the above results***
+
+```{r}
+dea.plot(x,y,RTS="vrs",ORIENTATION="in-out",txt=TRUE, 
+         xlab = "Input", ylab ="Output")
+dea.plot(x,y,RTS="drs",ORIENTATION="in-out",add=TRUE,lty="dashed",lwd=2,col="yellow")
+dea.plot(x,y,RTS="irs",ORIENTATION="in-out",add=TRUE,lty="dotted",lwd=2, col="red")
+dea.plot(x,y,RTS="crs",ORIENTATION="in-out",add=TRUE,lty="dotted",lwd=2, col="blue")
+dea.plot(x,y,RTS="fdh",ORIENTATION="in-out",txt=TRUE,main="fdh",
+         xlab = "Input", ylab ="Output")
+dea.plot(x,y,RTS="fdh+",ORIENTATION="in-out",add=TRUE,lty="dotted",param=.5)
+```
