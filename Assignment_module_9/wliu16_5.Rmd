@@ -36,7 +36,7 @@ get.variables(gp_sl)
 <br> 
 
 **Conclusion** <br>  
-x1=x2=0, x3=15, y1p=25, y1m=y2m=y2p=0. Profit is 25*15= 325 millions of dollars. 
+Z =225 mil d, x1=x2=0, x3=15, y1p=25, y1m=y2m=y2p=0.Profit is 25*15= 325 mil d. 
 Employment is 7500 which has 2500 employees more than the goal so y1p=25, y1m=0.
 Earnings next year is 75 millions of dollars which is the same with the goal
 so y2m=y2p=0.
