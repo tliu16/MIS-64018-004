@@ -1,0 +1,48 @@
+---
+title: "Assignment_5"
+author: "wliu16"
+date: "2022-11-15"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(lpSolveAPI)
+x <- read.lp("CalMan.lp")
+x
+```
+
+```{r}
+solve(x)
+get.objective(x)
+get.variables(x)
+```
+**Comment**<br>  
+Number of workers taken Monday and Sun off is 2<br>  
+Number of workers taken Monday and Tue off is 4<br>  
+Number of workers taken Tue and Wed off is 5<br>  
+Number of workers taken Wed and Thur off is 0<br>  
+Number of workers taken Thur and Fri off is 8<br>  
+Number of workers taken Fri and Sat off is 1<br>  
+Number of workers taken Sat and Sun off is 13<br>  
+<br>  
+
+We assume x1, x2... x7 as number of workers assigned to shift 1-7. Because every
+worker is assigned to one and only one shift, number of workers for a day is the 
+total of every one not taking that day off. <br>  
+
+Mon workers = 5 + 0 + 8 + 1+ 13 = 27<br>  
+Tue workers = 2+ 0 + 8 + 1 + 13 = 24<br>  
+Wed workers = 2+ 4 + 8 + 1+ 13 = 28<br>  
+Thur workers = 2+ 4+ 5 + 1+ 13= 25<br>  
+Fri workers = 2+ 4+ 5 + 0 + 13 = 24<br>  
+Sat workers = 2+ 4+ 5 + 0 + 8 = 19<br>  
+Sun workers = 4+ 5 + 0 + 8 + 1= 18<br>  
+<br>  
+
+The optimal solution, or the lowest wage is Z = $25675 while keeping the sufficient
+number of workers. The number of workers each day is 27 (Monday), 24 (Tuesday), 
+28 (Wednesday), 25 (Thursday), 24 (Friday), 19 (Saturday), 18 (Sunday).
